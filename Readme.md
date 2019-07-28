@@ -95,8 +95,8 @@ when you get it you need to change the host to externalHosts
 
 open two terminal
 
-#cf logs {application name}
-cf logs example-js-docker-iothub
+    #cf logs {application name}
+    cf logs example-js-docker-iothub
 
 .
 
