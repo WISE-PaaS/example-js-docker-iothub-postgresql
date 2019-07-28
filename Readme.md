@@ -16,13 +16,16 @@ docker
 
 [https://www.docker.com/](https://www.docker.com/)
 
+Postgrsql(you can also download pgAdmin so you can see the result in )
+https://www.postgresql.org/
+
 #### Download this repository
 
     git clone https://github.com/WISE-PaaS/example-js-docker-iothub/
 
 #### Check our the service name in `index.js`
 
-We nedd to create our service in WISE-PaaS first，and the service name need same as WISE-PaaS platform service name
+We need to create our service in WISE-PaaS first，and the service name need same as WISE-PaaS platform service name
 
 ![Imgur](https://i.imgur.com/6777rmg.png)
 
@@ -101,13 +104,13 @@ cf logs example-js-docker-iothub
 
 ![https://github.com/WISE-PaaS/example-js-docker-iothub-mongodb/blob/master/source/send_data_successful.PNG](https://github.com/WISE-PaaS/example-js-docker-iothub-mongodb/blob/master/source/send_data_successful.PNG)
 
-#### you can watch the row data use Robo 3T，and the config can find in WISE-PaaS Application Environment(WISE-PaaS/EnSaaS => application List => click application => environment)
+#### you can watch the row data use Postgresql-pgAdmin，and the config can find in WISE-PaaS Application Environment(WISE-PaaS/EnSaaS => application List => click application => environment)
 
-Robo 3T create server(File => connect => Create)
+pgAdmin create server(Servers => right click => Create => Server)
 
 - address => VCAP_SERVICES => mongodb-innoworks => 0 => external_host
 - Database => VCAP_SERVICES => mongodb-innoworks => 0 => credentials => database
 - Username => VCAP_SERVICES => mongodb-innoworks => 0 => credentials => username
 - Password => VCAP_SERVICES => mongodb-innoworks => 0 => credentials => password
 
-![https://github.com/WISE-PaaS/example-js-docker-iothub-mongodb/blob/master/source/successs_save.PNG](https://github.com/WISE-PaaS/example-js-docker-iothub-mongodb/blob/master/source/successs_save.PNG)
+[Imgur](https://i.imgur.com/cZJ6bQT.png)
