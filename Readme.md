@@ -24,11 +24,11 @@ docker
 
 We nedd to create our service in WISE-PaaS first，and the service name need same as WISE-PaaS platform service name
 
-![https://imgur.com/6777rmg](https://imgur.com/6777rmg)
+![[Imgur](https://i.imgur.com/6777rmg.png)]([Imgur](https://i.imgur.com/6777rmg.png))
 
-![https://imgur.com/jmQD5L4](https://imgur.com/jmQD5L4)
+![[Imgur](https://i.imgur.com/jmQD5L4.png)]([Imgur](https://i.imgur.com/jmQD5L4.png))
 
-![https://imgur.com/B7Zgfk1](https://imgur.com/B7Zgfk1)
+![[Imgur](https://i.imgur.com/B7Zgfk1.png)]([Imgur](https://i.imgur.com/B7Zgfk1.png))
 
 #### Build docker image in local
 
@@ -53,7 +53,7 @@ Tag image to a docker hub
 
 #### Use cf(cloud foundry) push to WISE-PaaS
 
-![https://imgur.com/JNJmxFy](https://imgur.com/JNJmxFy)
+![[Imgur](https://i.imgur.com/JNJmxFy.png)]([Imgur](https://i.imgur.com/JNJmxFy.png))
 
     #cf login -a api.{domain name} -u {WISE-PaaS/EnSaaS account} -p {WISE-PaaS/EnSaaS password}
     cf login -a api.wise-paas.io -u xxxxx@advantech.com -p xxxxxxxx
@@ -62,7 +62,7 @@ Tag image to a docker hub
     cf push --docker-image tsian077/example-js-docker-iotpost --no-start
 
 The **postgresql_service_name** and **iothub_service_name** must be same in WISE-PaaS Service Instance name
-![https://imgur.com/VVMcYO8](https://imgur.com/VVMcYO8)
+![[Imgur](https://i.imgur.com/VVMcYO8.png)]([Imgur](https://i.imgur.com/VVMcYO8.png)
 
     cf bs {application name} {postgresql_service_name} -c '{\"group\":\"groupFamily\"}'
     cf bs example-js-docker-iotpost postgresql -c '{\"group\":\"groupFamily\"}'
