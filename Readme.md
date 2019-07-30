@@ -2,27 +2,37 @@
 
 This example tell you how to use the WISE-PaaS rabbitmq service to receive and send message use PostgreSQL save it，we use docker package our application。
 
-#### Environment Prepare
+[cf-introduce](https://advantech.wistia.com/medias/ll0ov3ce9e)
 
-node.js(need include npm)
+[IotHub](https://advantech.wistia.com/medias/up3q2vxvn3)
 
-[https://nodejs.org/en/](https://nodejs.org/en/)
+## Environment Prepare
 
-cf-cli
+#### node.js(need include npm)
 
-[https://docs.cloudfoundry.org/cf-cli/install-go-cli.html](https://docs.cloudfoundry.org/cf-cli/install-go-cli.html)
+[node](https://nodejs.org/en/)
 
-docker
+#### cf-cli
 
-[https://www.docker.com/](https://www.docker.com/)
+[cf-cli](https://docs.cloudfoundry.org/cf-cli/install-go-cli.html)
 
-Postgrsql(you can also download pgAdmin so you can see the result in )
+Use to push application to WISE-PaaS，if you want to know more you can see this video
+
+#### Docker
+
+[docker](https://www.docker.com/)
+
+Use to packaged our application
+
+#### Postgrsql
+
+You can download pgAdmin so you can see the result in WISE-PaaS Postgresql servince instance
 
 [https://www.postgresql.org/](https://www.postgresql.org/)
 
 #### Download this repository
 
-    git clone 
+    git clone https://github.com/WISE-PaaS/example-js-docker-iothub-postgresql.git
 
 #### Check our the service name in `index.js`
 
@@ -30,9 +40,81 @@ We need to create our service in WISE-PaaS first，and the service name need sam
 
 ![Imgur](https://i.imgur.com/6777rmg.png)
 
+The `vcapServices` can get the application environment on WISE-PaaS，so we can get our service config to connect it。
+
 ![Imgur](https://i.imgur.com/jmQD5L4.png)
 
 ![Imgur](https://i.imgur.com/B7Zgfk1.png)
+
+Notice:You can add service instance by yourself
+
+![Imgur](https://i.imgur.com/ajqSsn1.png)
+
+#### Application Introduce
+
+This code define the `group、schema、table` and we create schema and table and bind to group。
+
+```js
+group_name = "groupFamily";
+schema_name = "home";
+table_name = "temperature";
+// SQL commands for creating table for storing data
+const queryString = `
+  CREATE SCHEMA IF NOT EXISTS "${schema_name}";
+  ALTER SCHEMA "${schema_name}" OWNER TO "${group_name}";
+  CREATE TABLE IF NOT EXISTS "${schema_name}"."${table_name}"(
+    id serial,
+    timestamp timestamp (2) default current_timestamp,
+    temperature integer,
+    PRIMARY KEY (id)
+  );
+  ALTER TABLE "${schema_name}"."${table_name}" OWNER to "${group_name}";
+  GRANT ALL ON ALL TABLES IN SCHEMA "${schema_name}" TO "${group_name}";
+  GRANT ALL ON ALL SEQUENCES IN SCHEMA "${schema_name}" TO "${group_name}";
+  `;
+```
+
+Connect to the rabbitmq service and insert data use `client.on('message',...)`
+
+```js
+const vcapServices = JSON.parse(process.env.VCAP_SERVICES);
+rabbitmq_service_name = "p-rabbitmq";
+const mqttUri =
+  vcapServices[rabbitmq_service_name][0].credentials.protocols.mqtt.uri;
+
+const client = mqtt.connect(mqttUri);
+
+// Subscribe
+client.on("connect", connack => {
+  client.subscribe("home/temperature", (err, granted) => {
+    if (err) console.log(err);
+
+    console.log(
+      "@" + formatTime() + " -- Subscribed to the topic: home/temperature"
+    );
+  });
+});
+
+// Receiving data
+client.on("message", (topic, message, packet) => {
+  let time = formatTime();
+  console.log(`@${time} -- Got data from: ${topic}`);
+
+  // mock temperature data
+  const temp = message.toString();
+
+  const queryString =
+    "INSERT INTO home.temperature(temperature) VALUES($1) RETURNING *";
+  const values = [temp];
+
+  pool
+    .query(queryString, values)
+    .then(result => {
+      console.log("Data added: ", result["rows"][0]);
+    })
+    .catch(err => console.error("Error adding data...", err.stack));
+});
+```
 
 #### Build docker image in local
 
@@ -67,6 +149,8 @@ Tag image to a docker hub
 
 The **postgresql_service_name** and **iothub_service_name** must be same in WISE-PaaS Service Instance name
 ![Imgur](https://i.imgur.com/VVMcYO8.png)
+
+Bind the service instance to our application，and the group we define in code must be same。
 
     cf bs {application name} {postgresql_service_name} -c '{\"group\":\"groupFamily\"}'
     cf bs example-js-docker-iotpost postgresql -c '{\"group\":\"groupFamily\"}'
@@ -107,7 +191,8 @@ open two terminal
 
     node publisher.js
 
-![https://github.com/WISE-PaaS/example-js-docker-iothub-mongodb/blob/master/source/send_data_successful.PNG](https://github.com/WISE-PaaS/example-js-docker-iothub-mongodb/blob/master/source/send_data_successful.PNG)
+(The apllication name maybe different)
+![Imgur](https://i.imgur.com/7TVqrC1.png)
 
 #### you can watch the row data use Postgresql-pgAdmin，and the config can find in WISE-PaaS Application Environment(WISE-PaaS/EnSaaS => application List => click application => environment)
 

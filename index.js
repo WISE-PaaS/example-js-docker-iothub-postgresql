@@ -132,8 +132,3 @@ function formatTime() {
     currentDate.getSeconds()
   );
 }
-
-//cf push --no-start
-//cf bs try_mongodb_docker postgresql -c '{\"group\":\"groupFamily\"}'
-//cf bs try_mongodb_docker rabbitmq
-//cf start try_mongodb_docker
