@@ -89,7 +89,7 @@ Get application environment in WISE-PaaS
 
 when you get it you need to change the host to externalHosts
 
-![https://github.com/WISE-PaaS/example-js-docker-iothub/blob/master/source/externalhost.PNG](https://github.com/WISE-PaaS/example-js-docker-iothub/blob/master/source/externalhost.PNG)
+![Imgur](https://i.imgur.com/xErDczu.png)
 
 - uri :"VCAP_SERVICES => p-rabbitmq => mqtt => uri"
 - exnternalhost : "VCAP_SERVICES => p-rabbitmq => externalHosts"
