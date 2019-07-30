@@ -22,7 +22,7 @@ Postgrsql(you can also download pgAdmin so you can see the result in )
 
 #### Download this repository
 
-    git clone https://github.com/WISE-PaaS/example-js-docker-iothub/
+    git clone 
 
 #### Check our the service name in `index.js`
 
