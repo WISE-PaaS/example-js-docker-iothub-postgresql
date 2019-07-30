@@ -118,4 +118,4 @@ pgAdmin create server(Servers => right click => Create => Server)
 - Username => VCAP_SERVICES => mongodb-innoworks => 0 => credentials => username
 - Password => VCAP_SERVICES => mongodb-innoworks => 0 => credentials => password
 
-[Imgur](https://i.imgur.com/cZJ6bQT.png)
+![Imgur](https://i.imgur.com/cZJ6bQT.png)
