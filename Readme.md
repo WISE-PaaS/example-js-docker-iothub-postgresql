@@ -91,6 +91,10 @@ when you get it you need to change the host to externalHosts
 
 ![Imgur](https://i.imgur.com/xErDczu.png)
 
+to
+
+![Imgur](https://i.imgur.com/YsSUgaz.png)
+
 - uri :"VCAP_SERVICES => p-rabbitmq => mqtt => uri"
 - exnternalhost : "VCAP_SERVICES => p-rabbitmq => externalHosts"
 
