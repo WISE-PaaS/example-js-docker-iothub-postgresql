@@ -116,6 +116,17 @@ client.on("message", (topic, message, packet) => {
 });
 ```
 
+
+## SSO(Single Sign On)
+
+This is the [sso](https://advantech.wistia.com/medias/vay5uug5q6) applicaition，open **`templates/index.html`** and editor the `ssoUrl` to your application name，
+
+If you don't want it，you can ignore it。
+  
+ #change this **`python-demo-try`** to your **application name**
+var ssoUrl = myUrl.replace('python-demo-try', 'portal-sso');
+
+
 #### Build docker image in local
 
     docker build -t {image name} .
