@@ -215,3 +215,8 @@ pgAdmin create server(Servers => right click => Create => Server)
 - Password => VCAP_SERVICES => mongodb-innoworks => 0 => credentials => password
 
 ![Imgur](https://i.imgur.com/cZJ6bQT.png)
+
+
+(Databases => Schemas => Tables => right click => View/Edit data)
+
+![Imgur](https://i.imgur.com/Jbj8u2c.png)
