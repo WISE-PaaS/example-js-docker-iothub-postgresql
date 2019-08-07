@@ -4,7 +4,11 @@ const moment = require("moment");
 const { Pool } = require("pg");
 
 const app = express();
-const numOfTempsReturned = 30;
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(` -- Server started on port ${port}!`);
+});
 
 // ----- Remote DB --- Get env variables
 const vcap_services = JSON.parse(process.env.VCAP_SERVICES);
@@ -29,6 +33,7 @@ const pool = new Pool({
 group_name = "groupFamily";
 schema_name = "home";
 table_name = "temperature";
+const numOfTempsReturned = 30;
 // SQL commands for creating table for storing data
 const queryString = `
   CREATE SCHEMA IF NOT EXISTS "${schema_name}";
@@ -75,11 +80,6 @@ app.get("/temps", (req, res) => {
       // res.render('index', { recipes: result['rows'] });
     })
     .catch(err => console.error("Error executing query...", err.stack));
-});
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(` -- Server started on port ${port}!`);
 });
 
 // -- Get env variables for rabbitmq service

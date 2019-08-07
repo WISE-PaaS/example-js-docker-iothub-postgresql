@@ -2,9 +2,9 @@
 
 This example tell you how to use the WISE-PaaS rabbitmq service to receive and send message use PostgreSQL save it，we use docker package our application。
 
-[cf-introduce](https://advantech.wistia.com/medias/ll0ov3ce9e)
+[cf-introduce Training Video](https://advantech.wistia.com/medias/ll0ov3ce9e)
 
-[IotHub](https://advantech.wistia.com/medias/up3q2vxvn3)
+[IotHub Training Video](https://advantech.wistia.com/medias/up3q2vxvn3)
 
 ## Environment Prepare
 
@@ -32,25 +32,62 @@ You can download pgAdmin so you can see the result in WISE-PaaS Postgresql servi
 
 #### Download this repository
 
+    #download this repository
     git clone https://github.com/WISE-PaaS/example-js-docker-iothub-postgresql.git
 
-#### Check our the service name in `index.js`
+    #download what package the application need
+    npm install
 
-We need to create our service in WISE-PaaS first，and the service name need same as WISE-PaaS platform service name
+## Application Introduce
 
-![Imgur](https://i.imgur.com/6777rmg.png)
+#### `index.js`
+
+Simple backend application and what package what we need。
+
+```js
+const mqtt = require("mqtt");
+const express = require("express");
+const moment = require("moment");
+const { Pool } = require("pg");
+
+const app = express();
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(` -- Server started on port ${port}!`);
+});
+```
 
 The `vcapServices` can get the application environment on WISE-PaaS，so we can get our service config to connect it。
 
-![Imgur](https://i.imgur.com/jmQD5L4.png)
+```js
+// ----- Remote DB --- Get env variables
+const vcap_services = JSON.parse(process.env.VCAP_SERVICES);
+postgresql_service_name = "postgresql-innoworks";
+const host = vcap_services[postgresql_service_name][0].credentials.host;
+const user = vcap_services[postgresql_service_name][0].credentials.username;
+const password = vcap_services[postgresql_service_name][0].credentials.password;
+const dbPort = vcap_services[postgresql_service_name][0].credentials.port;
+const database = vcap_services[postgresql_service_name][0].credentials.database;
+
+const pool = new Pool({
+  host: host,
+  user: user,
+  password: password,
+  port: dbPort,
+  database: database,
+  max: 3,
+  idleTimeoutMillis: 5000,
+  connectionTimeoutMillis: 2000
+});
+```
 
 ![Imgur](https://i.imgur.com/B7Zgfk1.png)
-
-Notice:You can add service instance by yourself
+(Notice:The postgresql_service_name need to same as WISE-PaaS Service name)
+![Imgur](https://i.imgur.com/6777rmg.png)
 
 ![Imgur](https://i.imgur.com/ajqSsn1.png)
-
-#### Application Introduce
+(Notice:You can add service instance by yourself)
 
 This code define the `group、schema、table` and we create schema and table and bind to group。
 
@@ -72,6 +109,39 @@ const queryString = `
   GRANT ALL ON ALL TABLES IN SCHEMA "${schema_name}" TO "${group_name}";
   GRANT ALL ON ALL SEQUENCES IN SCHEMA "${schema_name}" TO "${group_name}";
   `;
+
+// Execute the SQL commands for startup
+pool
+  .query(queryString)
+  .then(result => {
+    console.log("@" + formatTime() + " -- Schema and table initialized.");
+  })
+  .catch(err => console.error("Error adding table...", err.stack));
+
+app.get("/", (req, res) => {
+  res.send("hello world");
+});
+
+app.get("/temps", (req, res) => {
+  const queryString = `
+    SELECT * 
+      FROM (SELECT * FROM ${schema_name}.${table_name} ORDER BY timestamp DESC LIMIT ${numOfTempsReturned})
+      AS lastRows
+      ORDER BY timestamp ASC;
+    `;
+  pool
+    .query(queryString) // No need to connect
+    .then(result => {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      // Format timestamp
+      result.rows.map(row => {
+        row.timestamp = moment(row.timestamp).format("MM-DD HH:mm:ss");
+      });
+      res.send({ temperatures: result.rows });
+      // res.render('index', { recipes: result['rows'] });
+    })
+    .catch(err => console.error("Error executing query...", err.stack));
+});
 ```
 
 Connect to the rabbitmq service and insert data use `client.on('message',...)`
@@ -114,6 +184,39 @@ client.on("message", (topic, message, packet) => {
     })
     .catch(err => console.error("Error adding data...", err.stack));
 });
+
+// Return current formatted time
+function formatTime() {
+  const currentDate = new Date();
+  return (
+    currentDate.getHours() +
+    ":" +
+    currentDate.getMinutes() +
+    ":" +
+    currentDate.getSeconds()
+  );
+}
+```
+
+(Notice:The `rabbitmq_service_name`also need to same as WSIE-PaaS)
+![Imgur](https://i.imgur.com/jmQD5L4.png)
+
+## Docker
+
+Dockerfile can help us download the package what we need。
+
+Dockerfile
+
+```docker
+FROM node:8-alpine
+
+COPY . /app
+ADD . /app
+WORKDIR /app
+RUN npm install
+
+EXPOSE 3000
+CMD npm start
 ```
 
 #### Build docker image in local
@@ -169,6 +272,37 @@ Get application environment in WISE-PaaS
     #cf env {application_nmae} > env.json
     cf env example-js-docker-iot-mongo > env.json
 
+## Publisher data to our application
+
+## publisher.js
+
+```js
+const mqtt = require("mqtt");
+
+const mqttUri =
+  "mqtt://xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx%3Af4e2645e-469d-4d37-b3fd-cdb830e999a5:VhHlRCA9nEMOauXaKGhyv78ol@40.81.26.31:1883";
+const client = mqtt.connect(mqttUri);
+
+client.on("connect", connack => {
+  setInterval(() => {
+    publistMockTemp();
+  }, 3000);
+});
+
+function publistMockTemp() {
+  const temp = Math.floor(Math.random() * 7 + 22);
+
+  client.publish(
+    "home/temperature",
+    temp.toString(),
+    { qos: 2 },
+    (err, packet) => {
+      if (!err) console.log("Data sent to home/temperature -- " + temp);
+    }
+  );
+}
+```
+
 #### Edit the **publisher.py** `mqttUri` to mqtt=>uri you can find in env.json
 
 when you get it you need to change the host to externalHosts
@@ -194,7 +328,7 @@ open two terminal
 (The apllication name maybe different)
 ![Imgur](https://i.imgur.com/7TVqrC1.png)
 
-#### you can watch the row data use Postgresql-pgAdmin，and the config can find in WISE-PaaS Application Environment(WISE-PaaS/EnSaaS => application List => click application => environment)
+#### You can watch the row data use Postgresql-pgAdmin，and the config can find in WISE-PaaS Application Environment(WISE-PaaS/EnSaaS => application List => click application => environment)
 
 pgAdmin create server(Servers => right click => Create => Server)
 
