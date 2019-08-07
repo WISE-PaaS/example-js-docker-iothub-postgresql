@@ -201,6 +201,25 @@ function formatTime() {
 (Notice:The `rabbitmq_service_name`also need to same as WSIE-PaaS)
 ![Imgur](https://i.imgur.com/jmQD5L4.png)
 
+#### manifest.yml
+
+This file save the config when we push application to the WISE-PaaS，`name` is your application name，memory and `memory`、`disk_quota` is how much memory and disk we give，command is to start our application。
+
+(Notice:You need to change the `name` because i already use it)
+```yml
+---
+applications:
+  #application name
+  - name: example-js-docker-iotpost
+
+    #buildpack: nodejs_buildpack
+
+    memory: 256M
+    disk_quota: 256M
+    command: node index.js
+
+```
+
 ## Docker
 
 Dockerfile can help us download the package what we need。
